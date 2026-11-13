@@ -2,41 +2,67 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <cmath> 
+#include <cmath>
+#include <iomanip>
 
 using namespace std;
 
-struct Estudiante {
+class Estudiante {
+private:
     string nombre;
     int anioNacimiento;
     float gpa;
     float presupuesto;
-};
 
-float calcularIndiceUniv(const Estudiante& est) {
-    return abs(est.gpa - 3.0f) * est.presupuesto;
-}
+public:
+    Estudiante(string nom = "NN", int anio = 0, float prom = 0.0f, float pres = 0.0f)
+        : nombre(nom), anioNacimiento(anio), gpa(prom), presupuesto(pres) {}
+
+    string getNombre() const { return nombre; }
+    int getAnioNacimiento() const { return anioNacimiento; }
+    float getGpa() const { return gpa; }
+    float getPresupuesto() const { return presupuesto; }
+
+    void setDatos(const string& nom, int anio, float prom, float pres) {
+        nombre = nom;
+        anioNacimiento = anio;
+        gpa = prom;
+        presupuesto = pres;
+    }
+
+    float calcularIndiceUniv() const {
+        return abs(gpa - 3.0f) * presupuesto;
+    }
+};
 
 void imprimirEstudiantes(const vector<Estudiante>& estudiantes) {
     if (estudiantes.empty()) {
         cout << "-> El vector esta vacio.\n";
         return;
     }
-    
-    cout << "\n--- LISTA DE ESTUDIANTES ---\n";
+
+    cout << "\n---------------------------- LISTA DE ESTUDIANTES ----------------------------\n";
+    cout << left << setw(6) << "IDX"
+         << setw(14) << "NOMBRE"
+         << setw(10) << "ANIO"
+         << setw(10) << "GPA"
+         << setw(16) << "PRESUPUESTO"
+         << "INDICE UNIV.\n";
+    cout << "------------------------------------------------------------------------------\n";
     for (size_t i = 0; i < estudiantes.size(); ++i) {
         const auto& est = estudiantes[i];
-        cout << "[" << i << "] Nombre: " << est.nombre 
-             << " | Anio: " << est.anioNacimiento 
-             << " | GPA: " << est.gpa 
-             << " | Presupuesto: " << est.presupuesto 
-             << " | Indice Univ: " << calcularIndiceUniv(est) << "\n";
+        cout << "[" << i << "]   "
+             << left << setw(14) << est.getNombre()
+             << setw(10) << est.getAnioNacimiento()
+             << fixed << setprecision(2) << setw(10) << est.getGpa()
+             << setw(16) << est.getPresupuesto()
+             << est.calcularIndiceUniv() << "\n";
     }
-    cout << "----------------------------\n";
+    cout << "------------------------------------------------------------------------------\n";
 }
 
 int main() {
-    vector<Estudiante> estudiantes; 
+    vector<Estudiante> estudiantes;
     int opcion = 0;
 
     do {
@@ -56,21 +82,24 @@ int main() {
                 int tipoDatos, posicion;
                 cout << "Tipo de datos (1: Por defecto [NN,0,0,0], 2: Personalizados): ";
                 cin >> tipoDatos;
-                
+
                 Estudiante nuevoEstudiante;
                 if (tipoDatos == 1) {
-                    nuevoEstudiante = {"NN", 0, 0.0f, 0.0f};
+                    nuevoEstudiante = Estudiante("NN", 0, 0.0f, 0.0f);
                 } else {
+                    string nom;
+                    int anio;
+                    float prom, pres;
                     cout << "Ingrese Nombre, Anio, GPA y Presupuesto (separados por espacio):\n";
-                    cin >> nuevoEstudiante.nombre >> nuevoEstudiante.anioNacimiento 
-                        >> nuevoEstudiante.gpa >> nuevoEstudiante.presupuesto;
+                    cin >> nom >> anio >> prom >> pres;
+                    nuevoEstudiante = Estudiante(nom, anio, prom, pres);
                 }
 
                 cout << "Ubicacion (1: Al final, 2: Indice especifico): ";
                 cin >> posicion;
 
                 if (posicion == 1) {
-                    estudiantes.push_back(nuevoEstudiante); 
+                    estudiantes.push_back(nuevoEstudiante);
                     cout << "-> Insertado al final exitosamente.\n";
                 } else {
                     int idx;
@@ -125,9 +154,12 @@ int main() {
                 cin >> idx;
 
                 if (idx >= 0 && idx < static_cast<int>(estudiantes.size())) {
+                    string nom;
+                    int anio;
+                    float prom, pres;
                     cout << "Ingrese los NUEVOS datos (Nombre Anio GPA Presupuesto):\n";
-                    cin >> estudiantes[idx].nombre >> estudiantes[idx].anioNacimiento 
-                        >> estudiantes[idx].gpa >> estudiantes[idx].presupuesto;
+                    cin >> nom >> anio >> prom >> pres;
+                    estudiantes[idx].setDatos(nom, anio, prom, pres);
                     cout << "-> Estudiante actualizado exitosamente.\n";
                 } else {
                     cout << "-> ERROR: Indice fuera de rango.\n";
@@ -147,19 +179,19 @@ int main() {
 
                 if (modoOrdenar == 1) {
                     sort(estudiantes.begin(), estudiantes.end(), [](const Estudiante& a, const Estudiante& b) {
-                        return a.anioNacimiento < b.anioNacimiento;
+                        return a.getAnioNacimiento() < b.getAnioNacimiento();
                     });
                 } else if (modoOrdenar == 2) {
                     sort(estudiantes.begin(), estudiantes.end(), [](const Estudiante& a, const Estudiante& b) {
-                        return a.gpa < b.gpa;
+                        return a.getGpa() < b.getGpa();
                     });
                 } else if (modoOrdenar == 3) {
                     sort(estudiantes.begin(), estudiantes.end(), [](const Estudiante& a, const Estudiante& b) {
-                        return a.presupuesto < b.presupuesto;
+                        return a.getPresupuesto() < b.getPresupuesto();
                     });
                 } else if (modoOrdenar == 4) {
                     sort(estudiantes.begin(), estudiantes.end(), [](const Estudiante& a, const Estudiante& b) {
-                        return calcularIndiceUniv(a) < calcularIndiceUniv(b);
+                        return a.calcularIndiceUniv() < b.calcularIndiceUniv();
                     });
                 } else {
                     cout << "-> ERROR: Opcion invalida.\n";
